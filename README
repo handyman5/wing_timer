@@ -1,6 +1,6 @@
 This script takes either an absolute or a relative time parameter, and uses that as the start of or distance to the next Wintergrasp battle (respectively). It sits in the console and prints out the time remaining once per second, and rolls over when time expires.
 
-Requires: python, dateutil (http://labix.org/python-dateutil/)
+Requires: python, dateutil [http://labix.org/python-dateutil/]
 
 Future plans:
 - a daemonized mode that will answer TCP socket requests with the current time remaining, for scripting purposes.

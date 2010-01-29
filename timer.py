@@ -19,7 +19,12 @@ class GameTimer(object):
         self._now = datetime.now()
         ng = "".join(next)
         if ng[0] == '+':
-            (hr, mn) = ng[1:].split(":")
+            hr = 0
+            mn = 0
+            try:
+                (hr, mn) = ng[1:].split(":")
+            except ValueError:
+                mn = ng[1:]
             self._game_seed = self._now + relativedelta(hours=int(hr), minutes=int(mn))
         else:
             self._game_seed = parse(ng)

@@ -13,38 +13,39 @@ class GameTimer(object):
     ESC = chr(27)
     _game_seed = 0
     _next_game = 0
-    _now = 0
 
     def __init__(self, next):
-        self._now = datetime.now()
         ng = "".join(next)
         if ng[0] == '+':
-            hr = 0
-            mn = 0
+            hr = mn = 0
             try:
                 (hr, mn) = ng[1:].split(":")
             except ValueError:
                 mn = ng[1:]
-            self._game_seed = self._now + relativedelta(hours=int(hr), minutes=int(mn))
+            self._game_seed = datetime.now() + relativedelta(hours=int(hr), minutes=int(mn))
         else:
             self._game_seed = parse(ng)
 
-        if relativedelta(self._game_seed, self._now).minutes < 0:
+        # Make specific times apply to the future only
+        if relativedelta(self._game_seed, datetime.now()).minutes < 0:
             self._game_seed = self._game_seed + relativedelta(days=1)
 
 
     def calc_next_game(self):
-        self._now = datetime.now()
-        if relativedelta(self._game_seed, self._now).minutes > 0:
-            self._next_game = self._game_seed
-        else:
+        if (self._game_seed < datetime.now()):
             self._game_seed = self._game_seed + relativedelta(hours=2, minutes=30)
-            self.calc_next_game()
+            print '''
+DEBUG: adding game time
+Current time: %s
+Game seed: %s
+Next game: %s
+''' % (datetime.now(), self._game_seed, self._next_game)
+        self._next_game = self._game_seed
 
 
     def __str__(self):
         self.calc_next_game()
-        next = relativedelta(self._next_game, self._now)
+        next = relativedelta(self._next_game, datetime.now())
         return "Next Wintergrasp is at %s (%s)" % (self._next_game.strftime("%I:%M %p"), (str(next.hours) + " hours, " + str(next.minutes) + " minutes, " + str(next.seconds) + " seconds"))
 
 
@@ -61,9 +62,10 @@ Specify time as "10:15 PM" or "+1 hour 10 minutes"/"+1:10" (uses fairly intellig
     w = stdout.write
 
     while True:
-        w(gt.ESC + '[2K')
-        w(gt.ESC + '[u')
+        w(gt.ESC + '[1K')
+        w(gt.ESC + '[0E')
         w(gt.ESC + '[s')
+        w(gt.ESC + '[u')
         w(str(gt))
         stdout.flush()
         sleep(1)
